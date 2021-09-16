@@ -278,11 +278,11 @@ module load sge
 			SAMPLE_ARRAY=(`awk 1 ${SAMPLE_SHEET} \
 				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d' \
 				| awk 'BEGIN {FS=","} $8=="'${SM_TAG}'" \
-					{print $1,$8,$12}' \
+					{print $1,$8,$12,$18}' \
 				| sort \
 				| uniq`)
 
-			#  1  Project=the Seq Proj folder name
+			# 1 Project=the Seq Proj folder name
 
 				PROJECT=${SAMPLE_ARRAY[0]}
 
@@ -295,7 +295,7 @@ module load sge
 				# 7 SKIP : Date=should be the run set up date to match the seq run folder name #
 				################################################################################
 
-			#  8  SM_Tag=sample ID
+			# 8 SM_Tag=sample ID
 
 				SM_TAG=${SAMPLE_ARRAY[1]}
 
@@ -309,9 +309,13 @@ module load sge
 				# 11 SKIP : Seq_Exp_ID ####################################################################
 				###########################################################################################
 
-			# 12  Genome_Ref=the reference genome used in the analysis pipeline
+			# 12 Genome_Ref=the reference genome used in the analysis pipeline
 
 				REF_GENOME=${SAMPLE_ARRAY[2]}
+
+					# REFERENCE DICTIONARY IS A SUMMARY OF EACH CONTIG. PAIRED WITH REF GENOME
+
+						REF_DICT=$(echo ${REF_GENOME} | sed 's/fasta$/dict/g; s/fa$/dict/g')
 
 				##########################################################################################
 				# 13 SKIP: Operator ######################################################################
@@ -322,10 +326,16 @@ module load sge
 				##### used for regions to perform base call quality score recalibration. #################
 				##### used for generate gvcf regions #####################################################
 				# 17 SKIP: Targets_BED_File=bed file acquired from manufacturer of their targets. ########
-				# 18 SKIP: KNOWN_SITES_VCF=used to annotate ID field in VCF file. ########################
-				#### used for masking in base call quality score recalibration. ##########################
-				# 19 SKIP: KNOWN_INDEL_FILES=used for BQSR masking #######################################
 				##########################################################################################
+
+			# 18 KNOWN_SITES_VCF=used to annotate ID field in VCF file.
+				# used for masking in base call quality score recalibration.
+
+					DBSNP=${SAMPLE_ARRAY[3]}
+
+				####################################################
+				# 19 SKIP: KNOWN_INDEL_FILES=used for BQSR masking #
+				####################################################
 	}
 
 ##################################################
@@ -401,7 +411,7 @@ module load sge
 					${STANDARD_QUEUE_QSUB_ARG} \
 				-N B01-A01-FILTER_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
 					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-FILTER_MUTECT2_MT.log \
-					-hold_jid B01-MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+				-hold_jid B01-MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
 				${SCRIPT_DIR}/B01-A01-FILTER_MUTECT2_MT.sh \
 					${MITO_MUTECT2_CONTAINER} \
 					${CORE_PATH} \
@@ -424,7 +434,7 @@ module load sge
 					${STANDARD_QUEUE_QSUB_ARG} \
 				-N B01-A01-A01-MASK_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
 					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-MASK_MUTECT2_MT.log \
-					-hold_jid B01-A01-FILTER_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+				-hold_jid B01-A01-FILTER_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
 				${SCRIPT_DIR}/B01-A01-A01-MASK_MUTECT2_MT.sh \
 					${MITO_MUTECT2_CONTAINER} \
 					${CORE_PATH} \
@@ -481,23 +491,49 @@ module load sge
 					${SUBMIT_STAMP}
 		}
 
-	##########################################
-	# run annovar on final mutect2 based vcf #
-	##########################################
+		##########################################
+		# run annovar on final mutect2 based vcf #
+		##########################################
 
-		FIX_ANNOVAR_MUTECT2_MT ()
+			FIX_ANNOVAR_MUTECT2_MT ()
+			{
+					echo \
+					qsub \
+						${QSUB_ARGS} \
+						${STANDARD_QUEUE_QSUB_ARG} \
+					-N B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+						-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-FIX_ANNOVAR_MUTECT2_MT.log \
+					-hold_jid B01-A01-A01-A02-RUN_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+					${SCRIPT_DIR}/B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT.sh \
+						${CORE_PATH} \
+						${PROJECT} \
+						${SM_TAG} \
+						${SAMPLE_SHEET} \
+						${SUBMIT_STAMP}
+			}
+
+	#######################################################################
+	# generate vcf metrics on mito mutect2 filtered and masked vcf output #
+	#######################################################################
+
+		VCF_METRICS_MT ()
 		{
 				echo \
 				qsub \
 					${QSUB_ARGS} \
 					${STANDARD_QUEUE_QSUB_ARG} \
-				-N B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
-					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-FIX_ANNOVAR_MUTECT2_MT.log \
-				-hold_jid B01-A01-A01-A02-RUN_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
-				${SCRIPT_DIR}/B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT.sh \
+				-N B01-A01-A01-A03-VCF_METRICS_MT_${SGE_SM_TAG}_${PROJECT} \
+					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-VCF_METRICS_MT.log \
+				-hold_jid B01-A01-A01-MASK_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+				${SCRIPT_DIR}/B01-A01-A01-A03-VCF_METRICS_MT.sh \
+					${ALIGNMENT_CONTAINER} \
 					${CORE_PATH} \
 					${PROJECT} \
 					${SM_TAG} \
+					${REF_DICT} \
+					${DBSNP} \
+					${MT_PICARD_INTERVAL_LIST} \
+					${THREADS} \
 					${SAMPLE_SHEET} \
 					${SUBMIT_STAMP}
 		}
@@ -682,6 +718,8 @@ module load sge
 		RUN_ANNOVAR_MUTECT2_MT
 		echo sleep 0.1s
 		FIX_ANNOVAR_MUTECT2_MT
+		echo sleep 0.1s
+		VCF_METRICS_MT
 		echo sleep 0.1s
 		# run eklipse workflow
 		SUBSET_BAM_MT
