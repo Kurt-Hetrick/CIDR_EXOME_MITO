@@ -29,11 +29,12 @@
 
 	PROJECT=$3
 	SM_TAG=$4
-	THREADS=$5
+	REF_GENOME=$5
+	THREADS=$6
 
-	SAMPLE_SHEET=$6
+	SAMPLE_SHEET=$7
 		SAMPLE_SHEET_NAME=$(basename ${SAMPLE_SHEET} .csv)
-	SUBMIT_STAMP=$7
+	SUBMIT_STAMP=$8
 
 ## --extract out the MT reads in the bam file
 
@@ -43,7 +44,7 @@ START_MAKE_MT_BAM=`date '+%s'` # capture time process starts for wall clock trac
 
 		CMD="singularity exec ${MITO_EKLIPSE_CONTAINER} samtools"
 		CMD=${CMD}" view"
-			CMD=${CMD}" -b ${CORE_PATH}/${PROJECT}/${SM_TAG}/CRAM/${SM_TAG}.cram"
+			CMD=${CMD}" -b ${CORE_PATH}/${PROJECT}/CRAM/${SM_TAG}.cram"
 			CMD=${CMD}" -T ${REF_GENOME}"
 			CMD=${CMD}" -@ ${THREADS}"
 			CMD=${CMD}" --write-index"

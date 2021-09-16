@@ -90,7 +90,7 @@ module load sge
 
 	# grab email addy
 
-		SEND_TO=`cat ${SCRIPT_DIR}/../email_lists.txt`
+		SEND_TO=$(cat ${SCRIPT_DIR}/../email_lists.txt)
 
 	# grab submitter's name
 
@@ -246,7 +246,7 @@ module load sge
 	{
 		CREATE_PROJECT_ARRAY
 		MAKE_PROJ_DIR_TREE
-		echo MT pipeline started at `date` >| ${CORE_PATH}/${PROJECT}/REPORTS/PROJECT_START_END_TIMESTAMP.txt
+		echo MT pipeline started at `date` >| ${CORE_PATH}/${SEQ_PROJECT}/REPORTS/PROJECT_START_END_TIMESTAMP.txt
 	}
 
 ##################################
@@ -278,7 +278,7 @@ module load sge
 			SAMPLE_ARRAY=(`awk 1 ${SAMPLE_SHEET} \
 				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d' \
 				| awk 'BEGIN {FS=","} $8=="'${SM_TAG}'" \
-					print $1,$8,$12}' \
+					{print $1,$8,$12}' \
 				| sort \
 				| uniq`)
 
@@ -547,6 +547,7 @@ module load sge
 				${CORE_PATH} \
 				${PROJECT} \
 				${SM_TAG} \
+				${REF_GENOME} \
 				${THREADS} \
 				${SAMPLE_SHEET} \
 				${SUBMIT_STAMP}
@@ -656,7 +657,7 @@ module load sge
 # run steps centered on gatk's mutect2 mitochondrial workflow #
 ###############################################################
 
-	for SAMPLE in $(awk 1 ${SAMPLE_SHEET} \
+	for SM_TAG in $(awk 1 ${SAMPLE_SHEET} \
 			| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
 			| awk 'BEGIN {FS=","} \
 				NR>1 \
@@ -668,6 +669,7 @@ module load sge
 		MAKE_SAMPLE_DIR_TREE
 		# convert cram back to bam
 		CRAM_TO_BAM
+		echo sleep 0.1s
 		# run mutect2 and then filter, annotate, run haplogrep2
 		MUTECT2_MT
 		echo sleep 0.1s
