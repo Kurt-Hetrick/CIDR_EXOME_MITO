@@ -53,9 +53,9 @@ START_FIX_ANNOVAR=`date '+%s'` # capture time process starts for wall clock trac
 			CMD=${CMD}" -e '1s/Otherinfo5/VCF_POS/'"
 			CMD=${CMD}" -e '1s/Otherinfo4/VCF_CHROM/'"
 			CMD=${CMD}" -e '1s/Otherinfo3/VCF_CUMULATIVE_AD/'"
-			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/ANNOVAR_MT/${SM_TAG}.GRCh37_MT_multianno.txt"
+			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/ANNOVAR_MT/${SM_TAG}.GRCh37_MT_multianno.txt"
 		CMD=${CMD}" &&"
-			CMD=${CMD}" mv -v ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/ANNOVAR_MT/${SM_TAG}.GRCh37_MT_multianno*"
+			CMD=${CMD}" mv -v ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/ANNOVAR_MT/${SM_TAG}.GRCh37_MT_multianno*"
 			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/ANNOVAR_MT/"
 
 	# write command line to file and execute the command line

@@ -49,13 +49,13 @@ START_MAKE_MT_BAM=`date '+%s'` # capture time process starts for wall clock trac
 			CMD=${CMD}" -@ ${THREADS}"
 			CMD=${CMD}" --write-index"
 			CMD=${CMD}" -O BAM"
-		CMD=${CMD}" -o ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}_MT.bam"
+		CMD=${CMD}" -o ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}_MT.bam"
 			CMD=${CMD}" MT"
 		# eklipse for some reason reads in a text file with the file path and a title (sample name)
 		# so generating that now
 		CMD=${CMD}" &&"
-			CMD=${CMD}" echo -e ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}_MT.bam'\t'${SM_TAG}"
-			CMD=${CMD}" >| ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}_EKLIPSE_CONFIG.txt"
+			CMD=${CMD}" echo -e ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}_MT.bam'\t'${SM_TAG}"
+			CMD=${CMD}" >| ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}_EKLIPSE_CONFIG.txt"
 
 	# write command line to file and execute the command line
 

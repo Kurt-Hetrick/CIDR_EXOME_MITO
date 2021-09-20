@@ -49,7 +49,7 @@ START_CRAM_TO_BAM=`date '+%s'` # capture time process starts for wall clock trac
 			CMD=${CMD}" -@ ${THREADS}" \
 			CMD=${CMD}" --write-index"
 			CMD=${CMD}" -O BAM"
-		CMD=${CMD}" -o ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}.bam"
+		CMD=${CMD}" -o ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.bam"
 
 	# write command line to file and execute the command line
 

@@ -44,7 +44,7 @@ START_MUTECT2_MT=`date '+%s'` # capture time process starts for wall clock track
 		CMD="singularity exec ${MITO_MUTECT2_CONTAINER} java -jar"
 			CMD=${CMD}" /gatk/gatk.jar"
 		CMD=${CMD}" Mutect2"
-			CMD=${CMD}" --input ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}.bam"
+			CMD=${CMD}" --input ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.bam"
 			CMD=${CMD}" --reference ${REF_GENOME}"
 			CMD=${CMD}" --mitochondria-mode true"
 			CMD=${CMD}" --max-mnp-distance 0"
@@ -62,8 +62,8 @@ START_MUTECT2_MT=`date '+%s'` # capture time process starts for wall clock track
 			CMD=${CMD}" --likelihood-calculation-engine PairHMM"
 			CMD=${CMD}" --annotation StrandBiasBySample"
 			CMD=${CMD}" --intervals MT:1-16569"
-		CMD=${CMD}" --bam-output ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}.MUTECT2_MT.bam"
-		CMD=${CMD}" --output ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}.MUTECT2_MT_RAW.vcf"
+		CMD=${CMD}" --bam-output ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.MUTECT2_MT.bam"
+		CMD=${CMD}" --output ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.MUTECT2_MT_RAW.vcf"
 
 	# write command line to file and execute the command line
 

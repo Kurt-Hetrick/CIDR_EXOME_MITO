@@ -43,13 +43,13 @@ START_RUN_EKLIPSE=`date '+%s'` # capture time process starts for wall clock trac
 	# construct command line
 
 		CMD="singularity exec ${MITO_EKLIPSE_CONTAINER} eKLIPse.py"
-			CMD=${CMD}" -in ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/${SM_TAG}_EKLIPSE_CONFIG.txt"
+			CMD=${CMD}" -in ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}_EKLIPSE_CONFIG.txt"
 			CMD=${CMD}" -ref ${MT_GENBANK}"
 			CMD=${CMD}" -thread ${THREADS}"
 			CMD=${CMD}" -downcov 0"
 			CMD=${CMD}" -scsize 15"
 			CMD=${CMD}" -mapsize 10"
-		CMD=${CMD}" -out ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/EKLIPSE"
+		CMD=${CMD}" -out ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/EKLIPSE"
 
 	# write command line to file and execute the command line
 

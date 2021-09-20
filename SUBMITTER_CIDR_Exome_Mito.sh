@@ -235,7 +235,7 @@ module load sge
 	{
 		mkdir -p \
 		${CORE_PATH}/${SEQ_PROJECT}/{LOGS,TEMP,COMMAND_LINES,REPORTS} \
-		${CORE_PATH}/${SEQ_PROJECT}/MT_OUTPUT/{COLLECTHSMETRICS_MT,MUTECT2_MT,HAPLOGROUPS,ANNOVAR_MT,EKLIPSE}
+		${CORE_PATH}/${SEQ_PROJECT}/MT_OUTPUT/{COLLECTHSMETRICS_MT,MUTECT2_MT,HAPLOGROUPS,ANNOVAR_MT,EKLIPSE,QC_REPORT_PREP_MT}
 	}
 
 ####################################################################
@@ -345,7 +345,7 @@ module load sge
 	MAKE_SAMPLE_DIR_TREE ()
 	{
 		mkdir -p \
-		${CORE_PATH}/${SEQ_PROJECT}/TEMP/${SM_TAG}/{ANNOVAR_MT,EKLIPSE}
+		${CORE_PATH}/${SEQ_PROJECT}/TEMP/${SM_TAG}_MT/{ANNOVAR_MT,EKLIPSE}
 	}
 
 ###########################################
@@ -689,6 +689,32 @@ module load sge
 				${SUBMIT_STAMP}
 		}
 
+######################################
+### QC REPORT PREP FOR EACH SAMPLE ###
+######################################
+
+QC_REPORT_PREP_MT ()
+{
+echo \
+qsub \
+	${QSUB_ARGS} \
+	${STANDARD_QUEUE_QSUB_ARG} \
+-N X01-QC_REPORT_PREP_MT_${SGE_SM_TAG}_${PROJECT} \
+	-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}-QC_REPORT_PREP_MT.log \
+-hold_jid \
+A02-A01-A01-FORMAT_EKLIPSE_CIRCOS_${SGE_SM_TAG}_${PROJECT},\
+A02-A02-A01-PLOT_MT_COVERAGE_${SGE_SM_TAG}_${PROJECT},\
+B01-A02-MUTECT2_MT_BAM_TO_CRAM_${SGE_SM_TAG}_${PROJECT},\
+B01-A01-A01-A01-HAPLOGREP2_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT},\
+B01-A01-A01-A03-VCF_METRICS_MT_${SGE_SM_TAG}_${PROJECT},\
+B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
+${SCRIPT_DIR}/X01-QC_REPORT_PREP_MT.sh \
+	${ALIGNMENT_CONTAINER} \
+	${CORE_PATH} \
+	${PROJECT} \
+	${SM_TAG}
+}
+
 ###############################################################
 # run steps centered on gatk's mutect2 mitochondrial workflow #
 ###############################################################
@@ -732,6 +758,9 @@ module load sge
 		COLLECTHSMETRICS_MT
 		echo sleep 0.1s
 		PLOT_MT_COVERAGE
+		echo sleep 0.1s
+		# create a qc report stub for each sample
+		QC_REPORT_PREP_MT
 		echo sleep 0.1s
 	done
 

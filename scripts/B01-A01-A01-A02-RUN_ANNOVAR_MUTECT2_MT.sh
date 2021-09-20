@@ -50,7 +50,7 @@ START_ANNOVAR_MUTECT2_MT=`date '+%s'` # capture time process starts for wall clo
 			CMD=${CMD}" --argument '','','','--infoasscore','',''"
 			CMD=${CMD}" --vcfdbfile GRCh37_MT_MMpolymorphisms_20210423.vcf,GRCh37_MT_MMdisease_20210423.vcf,GRCh37_MT_gnomAD_3-1.vcf"
 			CMD=${CMD}" --vcfinput"
-		CMD=${CMD}" --outfile ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}/ANNOVAR_MT/${SM_TAG}"
+		CMD=${CMD}" --outfile ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/ANNOVAR_MT/${SM_TAG}"
 
 	# write command line to file and execute the command line
 
