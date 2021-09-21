@@ -764,74 +764,71 @@ ${SCRIPT_DIR}/X01-QC_REPORT_PREP_MT.sh \
 		echo sleep 0.1s
 	done
 
-# #############################
-# ##### END PROJECT TASKS #####
-# #############################
+#############################
+##### END PROJECT TASKS #####
+#############################
 
-# 	# build hold id for per sample, per project
-# 	# this is not going to scale...
+	# build hold id for per sample, per project
+	# this is not going to scale...
 
-# 		BUILD_HOLD_ID_PATH_PROJECT_WRAP_UP ()
-# 		{
-# 			HOLD_ID_PATH="-hold_jid "
+		BUILD_HOLD_ID_PATH_PROJECT_WRAP_UP ()
+		{
+			HOLD_ID_PATH="-hold_jid "
 
-# 			for SAMPLE in $(awk 1 ${SAMPLE_SHEET} \
-# 				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
-# 				| awk 'BEGIN {FS=","} \
-# 					$1=="'${PROJECT}'" \
-# 					{print $8}' \
-# 				| sort \
-# 				| uniq);
-# 			do
-# 				CREATE_SAMPLE_ARRAY
+			for SAMPLE in $(awk 1 ${SAMPLE_SHEET} \
+				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
+				| awk 'BEGIN {FS=","} \
+					$1=="'${PROJECT}'" \
+					{print $8}' \
+				| sort \
+				| uniq);
+			do
+				CREATE_SAMPLE_ARRAY
 
-# 				HOLD_ID_PATH="${HOLD_ID_PATH}A02-A02-A01-PLOT_MT_COVERAGE_${SGE_SM_TAG}_${PROJECT},\
-# 					A02-A01-RUN_EKLIPSE_${SGE_SM_TAG}_${PROJECT},\
-# 					B01-A01-A01-A02-A01-FIX_ANNOVAR_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT},\
-# 					B01-A01-A01-A01-HAPLOGREP2_MUTECT2_MT_${SGE_SM_TAG}_${PROJECT},"
+				HOLD_ID_PATH="${HOLD_ID_PATH}X01-QC_REPORT_PREP_MT_${SGE_SM_TAG}_${PROJECT},"
 
-# 				HOLD_ID_PATH=`echo ${HOLD_ID_PATH} | sed 's/@/_/g'`
-# 			done
-# 		}
+				HOLD_ID_PATH=`echo ${HOLD_ID_PATH} | sed 's/@/_/g'`
+			done
+		}
 
-# 	# run end project functions (md5, file clean-up) for each project
+	# run end project functions (md5, file clean-up) for each project
 
-# 		PROJECT_WRAP_UP ()
-# 		{
-# 			echo \
-# 			qsub \
-# 				${QSUB_ARGS} \
-# 				${STANDARD_QUEUE_QSUB_ARG} \
-# 			-N X01-END_PROJECT_TASKS_${PROJECT} \
-# 				-o ${CORE_PATH}/${PROJECT}/LOGS/${PROJECT}-END_PROJECT_TASKS.log \
-# 			${HOLD_ID_PATH} \
-# 			${SCRIPT_DIR}/X01-END_PROJECT_TASKS.sh \
-# 				${ALIGNMENT_CONTAINER} \
-# 				${CORE_PATH} \
-# 				${PROJECT} \
-# 				${SCRIPT_DIR} \
-# 				${SEND_TO} \
-# 				${SUBMITTER_ID} \
-# 				${THREADS} \
-# 				${SAMPLE_SHEET} \
-# 				${SUBMIT_STAMP}
-# 		}
+		PROJECT_WRAP_UP ()
+		{
+			echo \
+			qsub \
+				${QSUB_ARGS} \
+				${STANDARD_QUEUE_QSUB_ARG} \
+			-N X01-X01-END_PROJECT_TASKS_${PROJECT} \
+				-o ${CORE_PATH}/${PROJECT}/LOGS/${PROJECT}-END_PROJECT_TASKS.log \
+			${HOLD_ID_PATH} \
+			${SCRIPT_DIR}/X01-X01-END_PROJECT_TASKS.sh \
+				${ALIGNMENT_CONTAINER} \
+				${CORE_PATH} \
+				${PROJECT} \
+				${SCRIPT_DIR} \
+				${SEND_TO} \
+				${SUBMITTER_ID} \
+				${THREADS} \
+				${SAMPLE_SHEET} \
+				${SUBMIT_STAMP}
+		}
 
-# ##############
-# # final loop #
-# ##############
+##############
+# final loop #
+##############
 
-# 	for PROJECT in $(awk 1 ${SAMPLE_SHEET} \
-# 		| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
-# 		| awk 'BEGIN {FS=","} \
-# 			NR>1 \
-# 			{print $1}' \
-# 		| sort \
-# 		| uniq);
-# 	do
-# 		BUILD_HOLD_ID_PATH_PROJECT_WRAP_UP
-# 		PROJECT_WRAP_UP
-# 	done
+	for PROJECT in $(awk 1 ${SAMPLE_SHEET} \
+		| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
+		| awk 'BEGIN {FS=","} \
+			NR>1 \
+			{print $1}' \
+		| sort \
+		| uniq);
+	do
+		BUILD_HOLD_ID_PATH_PROJECT_WRAP_UP
+		PROJECT_WRAP_UP
+	done
 
 # MESSAGE THAT SAMPLE SHEET HAS FINISHED SUBMITTING
 
