@@ -24,7 +24,7 @@
 
 # INPUT VARIABLES
 
-	MITO_MUTECT2_CONTAINER=$1
+	GATK_CONTAINER_4_2_2_0=$1
 	CORE_PATH=$2
 
 	PROJECT=$3
@@ -42,7 +42,7 @@ START_COLLECTHSMETRICS_MT=`date '+%s'` # capture time process starts for wall cl
 
 	# construct command line
 
-		CMD="singularity exec ${MITO_MUTECT2_CONTAINER} java -jar"
+		CMD="singularity exec ${GATK_CONTAINER_4_2_2_0} java -jar"
 			CMD=${CMD}" /gatk/gatk.jar"
 		CMD=${CMD}" CollectHsMetrics"
 			CMD=${CMD}" --INPUT ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}_MT.bam"

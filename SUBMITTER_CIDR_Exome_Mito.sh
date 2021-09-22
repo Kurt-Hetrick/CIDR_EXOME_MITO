@@ -135,7 +135,7 @@ module load sge
 # PIPELINE PROGRAMS #
 #####################
 
-	ALIGNMENT_CONTAINER="/mnt/clinical/ddl/NGS/Exome_Resources/PIPELINES/JHGenomics_CGC_Clinical_Exome_Mito/containers/ddl_ce_control_align-0.0.4.simg" # just used for the end tasks wrap up (datamash,parallel).
+	ALIGNMENT_CONTAINER="/mnt/research/tools/LINUX/00_GIT_REPO_KURT/CIDR_EXOME_MITO/containers/ddl_ce_control_align-0.0.4.simg" # just used for the end tasks wrap up (datamash,parallel).
 		# contains the following software and is on Ubuntu 16.04.5 LTS
 			# gatk 4.0.11.0 (base image). also contains the following.
 				# Python 3.6.2 :: Continuum Analytics, Inc.
@@ -167,18 +167,20 @@ module load sge
 				# bcftools 1.10.2
 				# parallel 20161222
 
-	MITO_MUTECT2_CONTAINER="/mnt/clinical/ddl/NGS/Exome_Resources/PIPELINES/JHGenomics_CGC_Clinical_Exome_Mito/containers/mito_mutect2-4.1.3.0.0.simg"
+	MITO_MUTECT2_CONTAINER="/mnt/research/tools/LINUX/00_GIT_REPO_KURT/CIDR_EXOME_MITO/containers/mito_mutect2-4.1.3.0.0.simg"
 		# uses broadinstitute/gatk:4.1.3.0 as the base image (as /gatk/gatk.jar)
 			# added
 				# bcftools-1.10.2
 				# haplogrep-2.1.20.jar (as /jars/haplogrep-2.1.20.jar)
 				# annovar
 
-	MITO_EKLIPSE_CONTAINER="/mnt/clinical/ddl/NGS/Exome_Resources/PIPELINES/JHGenomics_CGC_Clinical_Exome_Mito/containers/mito_eklipse-master-c25931b.0.simg"
+	MITO_EKLIPSE_CONTAINER="/mnt/research/tools/LINUX/00_GIT_REPO_KURT/CIDR_EXOME_MITO/containers/mito_eklipse-master-c25931b.0.simg"
 		# https://github.com/dooguypapua/eKLIPse AND all of its dependencies
 
-	MITO_MAGICK_CONTAINER="/mnt/clinical/ddl/NGS/CIDRSeqSuite/containers/mito_magick-6.8.9.9.0.simg"
+	MITO_MAGICK_CONTAINER="/mnt/research/tools/LINUX/00_GIT_REPO_KURT/CIDR_EXOME_MITO/containers/mito_magick-6.8.9.9.0.simg"
 		# magick package for R. see dockerfile for details.
+
+	GATK_CONTAINER_4_2_2_0="/mnt/research/tools/LINUX/00_GIT_REPO_KURT/CIDR_EXOME_MITO/containers/gatk-4.2.2.0.simg"
 
 	EKLIPSE_CIRCOS_LEGEND="${SCRIPT_DIR}/circos_legend.png"
 
@@ -656,7 +658,7 @@ module load sge
 				-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-COLLECTHSMETRICS_MT.log \
 			-hold_jid A02-MAKE_BAM_MT_${SGE_SM_TAG}_${PROJECT} \
 			${SCRIPT_DIR}/A02-A02-COLLECTHSMETRICS_MT.sh \
-				${MITO_MUTECT2_CONTAINER} \
+				${GATK_CONTAINER_4_2_2_0} \
 				${CORE_PATH} \
 				${PROJECT} \
 				${SM_TAG} \
