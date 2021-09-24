@@ -224,7 +224,7 @@
 
 	# since I don't have have any examples of what failures look like, I can't really build that in
 
-	if [[ ! -f ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt ]]
+	if [[ ! -f ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt ]]
 		then
 			echo -e NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN \
 			| singularity exec ${ALIGNMENT_CONTAINER} datamash \
@@ -235,7 +235,7 @@
 			awk 'BEGIN {FS="\t";OFS="\t"} \
 				NR==8 \
 				{print $6,$9,$10*100,$13,$15,$16*100,$20,$21,$22,$23,$24,$3,$4}' \
-			${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt \
+			${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt \
 			| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 				transpose \
 			>> ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.QC_REPORT_TEMP_MT.txt

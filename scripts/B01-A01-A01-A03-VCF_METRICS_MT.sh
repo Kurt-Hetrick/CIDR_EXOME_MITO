@@ -51,15 +51,15 @@ START_VCF_METRICS_BAIT=`date '+%s'`
 			CMD=${CMD}" --SEQUENCE_DICTIONARY ${REF_DICT}"
 			CMD=${CMD}" --TARGET_INTERVALS ${MT_PICARD_INTERVAL_LIST}"
 			CMD=${CMD}" --THREAD_COUNT ${THREADS}"
-		CMD=${CMD}" --OUTPUT ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT"
+		CMD=${CMD}" --OUTPUT ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT"
 		CMD=${CMD}" &&"
 		CMD=${CMD}" mv -v"
-			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics"
-			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt"
+			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics"
+			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt"
 		CMD=${CMD}" &&"
 		CMD=${CMD}" mv -v"
-			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_summary_metrics"
-			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/MUTECT2_MT/${SM_TAG}_MUTECT2_MT.variant_calling_summary_metrics.txt"
+			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_summary_metrics"
+			CMD=${CMD}" ${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_summary_metrics.txt"
 
 	# write command line to file and execute the command line
 
