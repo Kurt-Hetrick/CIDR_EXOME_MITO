@@ -47,9 +47,9 @@
 #################################################################################
 
 	cat ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_PREP_MT/*.QC_REPORT_PREP_MT.txt \
-		| sort -k 2,2 \
-		| awk 'BEGIN {print "PROJECT",\
-			"SM_TAG",\
+		| sort -k 1,1 \
+		| awk 'BEGIN {print "SM_TAG",\
+			"PROJECT",\
 			"PLATFORM_UNIT",\
 			"LIBRARY_NAME",\
 			"LIBRARY_PLATE",\
@@ -113,176 +113,201 @@
 			{print $0}' \
 		| sed 's/ /,/g' \
 		| sed 's/\t/,/g' \
-	>| ${CORE_PATH}/${PROJECT}/MT_OUTPUT/${PROJECT}.QC_REPORT_MT.${TIMESTAMP}.csv
+	>| ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_MT/${PROJECT}.QC_REPORT_MT.${TIMESTAMP}.csv
 
-# ##############################################################
-# ##### CLEAN-UP OR NOT DEPENDING ON IF JOBS FAILED OR NOT #####
-# ##### RUN MD5 CHECK ON REMAINING FILES #######################
-# ##############################################################
+###########################################################################
+##### Make a QC report for just the samples in this batch per project #####
+###########################################################################
 
-# 	# CREATE SAMPLE ARRAY, USED DURING PROJECT CLEANUP
+	SAMPLE_SHEET_NAME=$(basename ${SAMPLE_SHEET} .csv)
 
-# 		CREATE_SAMPLE_ARRAY_FOR_FILE_CLEANUP ()
-# 		{
-# 			SAMPLE_ARRAY=(`awk 1 $SAMPLE_SHEET \
-# 				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d' \
-# 				| awk 'BEGIN {FS=",";OFS="\t"} $1=="'$PROJECT'"&&$8=="'$SM_TAG'" {print $1,$8}' \
-# 				| sort -k 1,1 -k 2,2 \
-# 				| uniq`)
+	# For each project in the sample sheet make a qc report containing only those samples in sample sheet.
+	# Create the headers for the new files using the header from the all sample sheet.
 
-# 				#  1  Project=the Seq Proj folder name
-# 				PROJECT_FILE_CLEANUP=${SAMPLE_ARRAY[0]}
+		head -n 1 ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_MT/${PROJECT}.QC_REPORT_MT.${TIMESTAMP}.csv \
+		>| ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_MT/${SAMPLE_SHEET_NAME}.QC_REPORT_MT.csv
 
-# 				#  8  SM_Tag=sample ID
-# 				SM_TAG_FILE_CLEANUP=${SAMPLE_ARRAY[1]}
-# 		}
+		CREATE_SAMPLE_ARRAY ()
+		{
+			SAMPLE_ARRAY=(`awk 1 ${SAMPLE_SHEET} \
+				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d' \
+				| awk 'BEGIN {FS=","} \
+					$8=="'${SM_TAG}'" \
+					{print $8}' \
+				| sort \
+				| uniq`)
 
-# 	# RUN MD5 IN PARALLEL USING 90% OF THE CPU PROCESSORS ON THE PIPELINE OUTPUT FILES
+			#  8  SM_Tag=sample ID
 
-# 		RUN_MD5_PARALLEL_OUTPUT_FILES ()
-# 		{
-# 			find $CORE_PATH/$PROJECT/*/*/MT_OUTPUT -type f \
-# 				| cut -f 2 \
-# 				| singularity exec $ALIGNMENT_CONTAINER \
-# 					parallel \
-# 						--no-notice \
-# 						-j $THREADS \
-# 						md5sum {} \
-# 			> $CORE_PATH/$PROJECT/REPORTS/"md5_mt_output_files_"$PROJECT"_"$TIMESTAMP".txt"
-# 		}
+				SM_TAG=${SAMPLE_ARRAY[0]}
+		}
 
-# 	# RUN MD5 IN PARALLEL USING 90% OF THE CPU PROCESSORS ON THE PIPELINE RESOURCE FILES
+		for SM_TAG in $(awk 'BEGIN {FS=","} \
+							$1=="'${PROJECT}'" \
+							{print $8}' \
+						${SAMPLE_SHEET} \
+							| sort \
+							| uniq );
+		do
+			CREATE_SAMPLE_ARRAY
 
-# 		RUN_MD5_PARALLEL_RESOURCE_FILES ()
-# 		{
-# 			find \
-# 				$SCRIPT_DIR/../resources/ \
-# 				-type f \
-# 			| cut -f 2 \
-# 			| singularity exec $ALIGNMENT_CONTAINER \
-# 				parallel \
-# 					--no-notice \
-# 					-j $THREADS \
-# 					md5sum {} \
-# 			> $CORE_PATH/$PROJECT/REPORTS/"md5_mt_pipeline_resources_"$PROJECT"_"$TIMESTAMP".txt"
-# 		}
+			cat ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_PREP_MT/${SM_TAG}.QC_REPORT_PREP_MT.txt \
+			>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}.QC_REPORT_MT.${TIMESTAMP}.txt
+		done
 
-# # IF THERE ARE NO FAILED JOBS THEN DELETE TEMP FILES STARTING WITH SM_TAG OR PLATFORM_UNIT
-# # ELSE; DON'T DELETE ANYTHING BUT SUMMARIZE WHAT FAILED.
-# # AFTER TEMP FILES ARE DELETED RUN MD5 IN PARALLEL
+		sed 's/\t/,/g' ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}.QC_REPORT_MT.${TIMESTAMP}.txt \
+		>> ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_MT/${SAMPLE_SHEET_NAME}.QC_REPORT_MT.csv
 
-# 	if [[ ! -f $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_ERRORS.txt" ]]
-# 		then
-# 			for SM_TAG in $(awk 'BEGIN {FS=","} $1=="'$PROJECT'" {print $8}' $SAMPLE_SHEET | sort | uniq)
-# 				do
-# 					CREATE_SAMPLE_ARRAY_FOR_FILE_CLEANUP
+##############################################################
+##### CLEAN-UP OR NOT DEPENDING ON IF JOBS FAILED OR NOT #####
+##############################################################
 
-# 					echo rm -rf $CORE_PATH/$PROJECT_FILE_CLEANUP/TEMP/$SM_TAG_FILE_CLEANUP*
+	# CREATE SAMPLE ARRAY, USED DURING PROJECT CLEANUP
 
-# 					# rm -rf $CORE_PATH/$PROJECT_FILE_CLEANUP/TEMP/$SM_TAG_FILE_CLEANUP* | bash
+		CREATE_SAMPLE_ARRAY_FOR_FILE_CLEANUP ()
+		{
+			SAMPLE_ARRAY=(`awk 1 ${SAMPLE_SHEET} \
+				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d' \
+				| awk 'BEGIN {FS=",";OFS="\t"} \
+					$1=="'${PROJECT}'"&&$8=="'${SM_TAG}'" \
+					{print $1,$8}' \
+				| sort \
+					-k 1,1 \
+					-k 2,2 \
+				| uniq`)
 
-# 			done
+				#  1  Project=the Seq Proj folder name
 
-# 			RUN_MD5_PARALLEL_OUTPUT_FILES
-# 			RUN_MD5_PARALLEL_RESOURCE_FILES
+					PROJECT_FILE_CLEANUP=${SAMPLE_ARRAY[0]}
 
-# 			printf "\n$PERSON_NAME Was The Submitter\n\n \
-# 				FILE MD5 HASHSUMS:\n "md5_mt_output_files_"$PROJECT"_"$TIMESTAMP".txt"\n \
-# 				"md5_mt_pipeline_resources_"$PROJECT"_"$TIMESTAMP".txt"\n\n \
-# 				NO JOBS FAILED: TEMP FILES DELETED" \
-# 				| mail -s "$SAMPLE_SHEET FOR $PROJECT has finished processing SUBMITTER_JHGenomics_CGC_Clinical_Exome_Mito.sh" \
-# 					$SEND_TO
+				#  8  SM_Tag=sample ID
 
-# 			# printf "\n$PERSON_NAME Was The Submitter\n\n \
-# 			# 	REPORTS ARE AT:\n $CORE_PATH/$PROJECT/REPORTS/QC_REPORTS\n\n \
-# 			# 	BATCH QC REPORT:\n $SAMPLE_SHEET_NAME".QC_REPORT.csv"\n\n \
-# 			# 	FILE MD5 HASHSUMS:\n "md5_mt_output_files_"$PROJECT"_"$TIMESTAMP".txt"\n \
-# 			# 	"md5_mt_pipeline_resources_"$PROJECT"_"$TIMESTAMP".txt"\n\n \
-# 			# 	NO JOBS FAILED: TEMP FILES DELETED" \
-# 			# 	| mail -s "$SAMPLE_SHEET FOR $PROJECT has finished processing SUBMITTER_JHGenomics_CGC_Clinical_Exome_Mito.sh" \
-# 			# 		$SEND_TO
+					SM_TAG_FILE_CLEANUP=${SAMPLE_ARRAY[1]}
+		}
 
-# 		else
-# 			# CONSTRUCT MESSAGE TO BE SENT SUMMARIZING THE FAILED JOBS
-# 				printf "SO BAD THINGS HAPPENED AND THE TEMP FILES WILL NOT BE DELETED FOR:\n" \
-# 					>| $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+# IF THERE ARE NO FAILED JOBS THEN DELETE TEMP FILES STARTING WITH SM_TAG OR PLATFORM_UNIT
+# ELSE; DON'T DELETE ANYTHING BUT SUMMARIZE WHAT FAILED.
 
-# 				printf "$SAMPLE_SHEET\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+	if [[ ! -f ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_ERRORS.txt ]]
+		then
+			for SM_TAG in $(awk 'BEGIN {FS=","} \
+								$1=="'${PROJECT}'" \
+								{print $8}' \
+							${SAMPLE_SHEET} \
+								| sort \
+								| uniq)
+			do
+				CREATE_SAMPLE_ARRAY_FOR_FILE_CLEANUP
 
-# 				printf "FOR PROJECT:\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				rm -rf ${CORE_PATH}/${PROJECT_FILE_CLEANUP}/TEMP/${SM_TAG_FILE_CLEANUP}_MT | bash
 
-# 				printf "$PROJECT\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+			done
 
-# 				printf "SOMEWHAT FULL LISTING OF FAILED JOBS ARE HERE:\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+			printf "\n${PERSON_NAME} Was The Submitter\n\n \
+				REPORTS ARE AT:\n ${CORE_PATH}/${PROJECT}/MT_OUTPUT/QC_REPORT_MT\n\n \
+				BATCH QC REPORT:\n ${SAMPLE_SHEET_NAME}.QC_REPORT_MT.csv\n\n \
+				NO JOBS FAILED: TEMP FILES DELETED" \
+				| mail -s "${SAMPLE_SHEET} FOR ${PROJECT} has finished processing SUBMITTER_CIDR_Exome_Mito.sh" \
+					${SEND_TO}
 
-# 				printf "$CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_ERRORS.txt"\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+		else
+			# CONSTRUCT MESSAGE TO BE SENT SUMMARIZING THE FAILED JOBS
+				printf "SO BAD THINGS HAPPENED AND THE TEMP FILES WILL NOT BE DELETED FOR:\n" \
+					>| ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "###################################################################\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "${SAMPLE_SHEET}\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "BELOW ARE THE SAMPLES AND THE MINIMUM NUMBER OF JOBS THAT FAILED PER SAMPLE:\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "FOR PROJECT:\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "###################################################################\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "${PROJECT}\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				egrep -v CONCORDANCE $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_ERRORS.txt" \
-# 					| awk 'BEGIN {OFS="\t"} NF==6 {print $1}' \
-# 					| sort \
-# 					| singularity exec $ALIGNMENT_CONTAINER datamash -g 1 count 1 \
-# 				>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "SOMEWHAT FULL LISTING OF FAILED JOBS ARE HERE:\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "###################################################################\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_ERRORS.txt\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "FOR THE SAMPLES THAT HAVE FAILED JOBS, THIS IS ROUGHLY THE FIRST JOB THAT FAILED FOR EACH SAMPLE:\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "###################################################################\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "###################################################################\n" \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "BELOW ARE THE SAMPLES AND THE MINIMUM NUMBER OF JOBS THAT FAILED PER SAMPLE:\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 				printf "SM_TAG NODE JOB_NAME USER EXIT LOG_FILE\n" | sed 's/ /\t/g' \
-# 						>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "###################################################################\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 			for sample in $(awk 'BEGIN {OFS="\t"} NF==6 {print $1}' $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_ERRORS.txt" | sort | uniq);
-# 				do
-# 					awk '$1=="'$sample'" {print $0 "\n" "\n"}' $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_ERRORS.txt" | head -n 1 \
-# 					>> $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
-# 			done
+				egrep -v CONCORDANCE ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_ERRORS.txt \
+					| awk 'BEGIN {OFS="\t"} \
+						NF==6 \
+						{print $1}' \
+					| sort \
+					| singularity exec $ALIGNMENT_CONTAINER datamash \
+						-g 1 \
+						count 1 \
+				>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 			sleep 2s
+				printf "###################################################################\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 			mail -s "FAILED JOBS: $PROJECT: $SAMPLE_SHEET_FILE_NAME" \
-# 			$SEND_TO \
-# 			< $CORE_PATH/$PROJECT/TEMP/$SAMPLE_SHEET_NAME"_"$SUBMIT_STAMP"_EMAIL_SUMMARY.txt"
+				printf "FOR THE SAMPLES THAT HAVE FAILED JOBS, THIS IS ROUGHLY THE FIRST JOB THAT FAILED FOR EACH SAMPLE:\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 	fi
+				printf "###################################################################\n" \
+					>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# 	sleep 2s
+				printf "SM_TAG NODE JOB_NAME USER EXIT LOG_FILE\n" | sed 's/ /\t/g' \
+						>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
 
-# ####################################################
-# ##### Clean up the Wall Clock minutes tracker. #####
-# ####################################################
+			for sample in $(awk 'BEGIN {OFS="\t"} \
+								NF==6 \
+								{print $1}' \
+							${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_ERRORS.txt \
+								| sort \
+								| uniq);
+			do
+				awk '$1=="'${sample}'" \
+					{print $0 "\n" "\n"}' \
+				${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_ERRORS.txt \
+					| head -n 1 \
+				>> ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
+			done
 
-# 	# clean up records that are malformed
-# 	# only keep jobs that ran longer than 3 minutes
+			sleep 2s
 
-# 		awk 'BEGIN {FS=",";OFS=","} $1~/^[A-Z 0-9]/&&$2!=""&&$3!=""&&$4!=""&&$5!=""&&$6!=""&&$7==""&&$5!~/A-Z/&&$6!~/A-Z/&&($6-$5)>180 \
-# 		{print $1,$2,$3,$4,$5,$6,($6-$5)/60,strftime("%F",$5),strftime("%F",$6),strftime("%F.%H-%M-%S",$5),strftime("%F.%H-%M-%S",$6)}' \
-# 		$CORE_PATH/$PROJECT/REPORTS/$PROJECT".WALL.CLOCK.TIMES.csv" \
-# 		| sed 's/_'"$PROJECT"'/,'"$PROJECT"'/g' \
-# 		| awk 'BEGIN {print "SAMPLE,PROJECT,TASK_GROUP,TASK,HOST,EPOCH_START,EPOCH_END,WC_MIN,START_DATE,END_DATE,TIMESTAMP_START,TIMESTAMP_END"} \
-# 		{print $0}' \
-# 		>| $CORE_PATH/$PROJECT/REPORTS/$PROJECT".WALL.CLOCK.TIMES.FIXED.csv"
+			mail -s "FAILED JOBS: ${PROJECT}: ${SAMPLE_SHEET_FILE_NAME}" \
+			$SEND_TO \
+			< ${CORE_PATH}/${PROJECT}/TEMP/${SAMPLE_SHEET_NAME}_${SUBMIT_STAMP}_EMAIL_SUMMARY.txt
+
+	fi
+
+	sleep 2s
+
+####################################################
+##### Clean up the Wall Clock minutes tracker. #####
+####################################################
+
+	# clean up records that are malformed
+	# only keep jobs that ran longer than 3 minutes
+
+		awk 'BEGIN {FS=",";OFS=","} \
+			$1~/^[A-Z 0-9]/&&$2!=""&&$3!=""&&$4!=""&&$5!=""&&$6!=""&&$7==""&&$5!~/A-Z/&&$6!~/A-Z/&&($6-$5)>180 \
+			{print $1,$2,$3,$4,$5,$6,($6-$5)/60,\
+			strftime("%F",$5),\
+			strftime("%F",$6),\
+			strftime("%F.%H-%M-%S",$5),\
+			strftime("%F.%H-%M-%S",$6)}' \
+		${CORE_PATH}/${PROJECT}/REPORTS/${PROJECT}.WALL.CLOCK.TIMES.csv \
+			| sed 's/_'"${PROJECT}"'/,'"${PROJECT}"'/g' \
+			| awk 'BEGIN {print "SAMPLE,PROJECT,TASK_GROUP,TASK,HOST,EPOCH_START,EPOCH_END,WC_MIN,START_DATE,END_DATE,TIMESTAMP_START,TIMESTAMP_END"} \
+				{print $0}' \
+		>| ${CORE_PATH}/${PROJECT}/REPORTS/${PROJECT}.WALL.CLOCK.TIMES.FIXED.csv
 
 # put a stamp as to when the run was done
 
-	echo MT pipeline finished at `date` >> $CORE_PATH/$PROJECT/REPORTS/PROJECT_START_END_TIMESTAMP.txt
+	echo MT pipeline finished at `date` >> ${CORE_PATH}/${PROJECT}/REPORTS/PROJECT_START_END_TIMESTAMP.txt
 
 # this is black magic that I don't know if it really helps. was having problems with getting the emails to send so I put a little delay in here.
 

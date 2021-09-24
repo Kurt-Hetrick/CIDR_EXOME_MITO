@@ -38,7 +38,7 @@
 ######################################################################################
 ######################################################################################
 ##### THIS IS THE HEADER #############################################################
-##### "PROJECT","SM_TAG","PLATFORM_UNIT","LIBRARY_NAME" ##############################
+##### "SM_TAG","PROJECT","PLATFORM_UNIT","LIBRARY_NAME" ##############################
 ##### "LIBRARY_PLATE","LIBRARY_WELL","LIBRARY_ROW","LIBRARY_COLUMN" ##################
 ##### "HYB_PLATE","HYB_WELL","HYB_ROW","HYB_COLUMN" ##################################
 ######################################################################################
@@ -48,7 +48,7 @@
 			cat ${CORE_PATH}/${PROJECT}/REPORTS/RG_HEADER/${SM_TAG}.RG_HEADER.txt \
 				| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 					-s \
-					-g 1,2 \
+					-g 2,1 \
 					collapse 3 \
 					unique 4 \
 					unique 5 \
@@ -130,7 +130,7 @@
 					| awk 'BEGIN { FS = OFS = "\t" } { for(i=1; i<=NF; i++) if($i ~ /^ *$/) $i = "NA" }; 1' \
 					| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 						-s \
-						-g 1,2 \
+						-g 2,1 \
 						collapse 3 \
 						unique 4 \
 						unique 5 \
