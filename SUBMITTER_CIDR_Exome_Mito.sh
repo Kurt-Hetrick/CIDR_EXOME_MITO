@@ -13,12 +13,13 @@ module load sge
 
 			if [[ ! ${PRIORITY} ]]
 				then
-				PRIORITY="-9"
+				PRIORITY="-16"
 			fi
 
 	QUEUE_LIST=$3 # optional. the queues that you want to submit to.
 		# if you want to set this then you need to set the 3rd argument as well (even to the default)
-		# if no 4th argument present then the default is cgc.q
+		# if no 4th argument present then the default is everything except the following
+		## all.q|cgc.q|rhel7.q|qtest.q|bigdata.q|uhoh.q|prod.q|rnd.q
 
 			if [[ ! ${QUEUE_LIST} ]]
 				then
@@ -347,7 +348,8 @@ module load sge
 	MAKE_SAMPLE_DIR_TREE ()
 	{
 		mkdir -p \
-		${CORE_PATH}/${SEQ_PROJECT}/TEMP/${SM_TAG}_MT/{ANNOVAR_MT,EKLIPSE}
+		${CORE_PATH}/${SEQ_PROJECT}/TEMP/${SM_TAG}_MT/{ANNOVAR_MT,EKLIPSE} \
+		${CORE_PATH}/${SEQ_PROJECT}/LOGS/${SM_TAG}
 	}
 
 ###########################################
@@ -367,7 +369,7 @@ module load sge
 				-N A01-CRAM_TO_BAM_${SGE_SM_TAG}_${PROJECT} \
 					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-CRAM_TO_BAM.log \
 				${SCRIPT_DIR}/A01-CRAM_TO_BAM.sh \
-					${ALIGNMENT_CONTAINER} \
+					${MITO_EKLIPSE_CONTAINER} \
 					${CORE_PATH} \
 					${PROJECT} \
 					${SM_TAG} \

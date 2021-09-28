@@ -42,11 +42,11 @@ START_CRAM_TO_BAM=`date '+%s'` # capture time process starts for wall clock trac
 
 	# construct command line
 
-		CMD="singularity exec ${MITO_EKLIPSE_CONTAINER} samtools" \
-		CMD=${CMD}" view" \
-			CMD=${CMD}" -b ${CORE_PATH}/${PROJECT}/CRAM/${SM_TAG}.cram" \
-			CMD=${CMD}" -T ${REF_GENOME}" \
-			CMD=${CMD}" -@ ${THREADS}" \
+		CMD="singularity exec ${MITO_EKLIPSE_CONTAINER} samtools"
+		CMD=${CMD}" view"
+			CMD=${CMD}" -b ${CORE_PATH}/${PROJECT}/CRAM/${SM_TAG}.cram"
+			CMD=${CMD}" -T ${REF_GENOME}"
+			CMD=${CMD}" -@ ${THREADS}"
 			CMD=${CMD}" --write-index"
 			CMD=${CMD}" -O BAM"
 		CMD=${CMD}" -o ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.bam"
