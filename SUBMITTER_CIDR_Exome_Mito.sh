@@ -751,6 +751,8 @@ ${SCRIPT_DIR}/X01-QC_REPORT_PREP_MT.sh \
 		echo sleep 0.1s
 		VCF_METRICS_MT
 		echo sleep 0.1s
+		MUTECT2_MT_BAM_TO_CRAM
+		echo sleep 0.1s
 		# run eklipse workflow
 		SUBSET_BAM_MT
 		echo sleep 0.1s
