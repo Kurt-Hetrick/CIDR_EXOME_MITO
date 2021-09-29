@@ -704,7 +704,7 @@ qsub \
 	${QSUB_ARGS} \
 	${STANDARD_QUEUE_QSUB_ARG} \
 -N MTQC_${SGE_SM_TAG} \
-	-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}-QC_REPORT_PREP_MT.log \
+	-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-QC_REPORT_PREP_MT.log \
 -hold_jid \
 A02-A01-A01-FORMAT_EKLIPSE_CIRCOS_${SGE_SM_TAG}_${PROJECT},\
 A02-A02-A01-PLOT_MT_COVERAGE_${SGE_SM_TAG}_${PROJECT},\
@@ -773,13 +773,12 @@ ${SCRIPT_DIR}/X01-QC_REPORT_PREP_MT.sh \
 #############################
 
 	# build hold id for per sample, per project
-	# this is not going to scale...
 
 		BUILD_HOLD_ID_PATH_PROJECT_WRAP_UP ()
 		{
 			HOLD_ID_PATH="-hold_jid "
 
-			for SAMPLE in $(awk 1 ${SAMPLE_SHEET} \
+			for SM_TAG in $(awk 1 ${SAMPLE_SHEET} \
 				| sed 's/\r//g; /^$/d; /^[[:space:]]*$/d; /^,/d' \
 				| awk 'BEGIN {FS=","} \
 					$1=="'${PROJECT}'" \

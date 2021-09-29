@@ -156,7 +156,7 @@
 ##### HYBRIDIZATION SELECTION REPORT ###################################################################
 ########################################################################################################
 ##### THIS IS THE HEADER ###############################################################################
-##### "MT_MEAN_TARGET_CVG","MT_MEDIAN_TARGET_CVG","MT_MAX_TARGET_CVG","MT_MIN_TARGET_CVG" ##############
+##### "MT_MEAN_TARGET_CVG","MT_MAX_TARGET_CVG","MT_MIN_TARGET_CVG" #####################################
 ##### "MT_PCT_TARGET_BASES_10X","MT_PCT_TARGET_BASES_20X","MT_PCT_TARGET_BASES_30X" ####################
 ##### "MT_PCT_TARGET_BASES_40X","MT_PCT_TARGET_BASES_50X","MT_PCT_TARGET_BASES_100X" ###################
 ##### "PCT_TARGET_BASES_250X","PCT_TARGET_BASES_500X","PCT_TARGET_BASES_1000X" #########################
@@ -165,8 +165,7 @@
 ##### "MT_PCT_PF_UQ_READS_ALIGNED","MT_PF_BASES","MT_PF_BASES_ALIGNED","MT_PF_UQ_BASES_ALIGNED" ########
 ##### "MT_ON_TARGET_BASES","MT_PCT_USABLE_BASES_ON_TARGET" #############################################
 ##### "MT_PCT_EXC_DUPE","MT_PCT_EXC_ADAPTER","MT_PCT_EXC_MAPQ","MT_PCT_EXC_BASEQ","MT_PCT_EXC_OVERLAP" #
-##### "MT_MEAN_BAIT_CVG,"MT_PCT_USABLE_BASES_ON_BAIT" ##################################################
-##### "MT_AT_DROPOUT","MT_GC_DROPOUT","MT_THEORETICAL_HET_SENSITIVITY","MT_HET_SNP_Q" ##################
+##### "MT_MEAN_BAIT_CVG,"MT_PCT_USABLE_BASES_ON_BAIT","MT_AT_DROPOUT","MT_GC_DROPOUT" ##################
 ########################################################################################################
 
 	# this will take when there are no reads in the file...but i don't think that it will handle when there are reads, but none fall on target
@@ -174,7 +173,7 @@
 
 		if [[ ! -f ${CORE_PATH}/${PROJECT}/MT_OUTPUT/COLLECTHSMETRICS_MT/${SM_TAG}.output.metrics ]]
 		then
-			echo -e NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN \
+			echo -e NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN'\t'NaN \
 			| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 				transpose \
 			>> ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.QC_REPORT_TEMP_MT.txt
@@ -183,12 +182,12 @@
 
 			awk 'BEGIN {FS="\t";OFS="\t"} \
 				NR==8 \
-				{print $34,$35,$36,$37,\
+				{print $34,$36,$37,\
 					$48*100,$49*100,$50*100,$51*100,$52*100,$53*100,\
 					$54*100,$55*100,$56*100,$57*100,$58*100,$59*100,\
 					$23,$26,$32*100,$27,$33*100,$25,$28,$29,$30,$12,\
 					$39*100,$40*100,$41*100,$42*100,$43*100,\
-					$10,$11*100,$63,$64,$65*100,$66}' \
+					$10,$11*100,$63,$64}' \
 			${CORE_PATH}/${PROJECT}/MT_OUTPUT/COLLECTHSMETRICS_MT/${SM_TAG}.output.metrics \
 			| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 				transpose \
@@ -234,7 +233,7 @@
 		else
 			awk 'BEGIN {FS="\t";OFS="\t"} \
 				NR==8 \
-				{print $6,$9,$10*100,$13,$15,$16*100,$20,$21,$22,$23,$24,$3,$4}' \
+				{print $6,$9,$10*100,$13,$15,$16*100,$20,$21,$22,$23,$24,$3*100,$4}' \
 			${CORE_PATH}/${PROJECT}/MT_OUTPUT/VCF_METRICS_MT/${SM_TAG}_MUTECT2_MT.variant_calling_detail_metrics.txt \
 			| singularity exec ${ALIGNMENT_CONTAINER} datamash \
 				transpose \
@@ -255,7 +254,7 @@
 
 		else
 			awk 'BEGIN {OFS="\t"} END {print NR-1}' \
-				$CORE_PATH/$PROJECT/MT_OUTPUT/EKLIPSE/${SM_TAG}_eKLIPse_deletions.tsv
+				$CORE_PATH/$PROJECT/MT_OUTPUT/EKLIPSE/${SM_TAG}_eKLIPse_deletions.tsv \
 			>> ${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/${SM_TAG}.QC_REPORT_TEMP_MT.txt
 	fi
 
