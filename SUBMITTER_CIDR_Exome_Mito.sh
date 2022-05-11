@@ -348,8 +348,8 @@ module load sge
 	MAKE_SAMPLE_DIR_TREE ()
 	{
 		mkdir -p \
-		${CORE_PATH}/${SEQ_PROJECT}/TEMP/${SM_TAG}_MT/{ANNOVAR_MT,EKLIPSE} \
-		${CORE_PATH}/${SEQ_PROJECT}/LOGS/${SM_TAG}
+		${CORE_PATH}/${PROJECT}/TEMP/${SM_TAG}_MT/{ANNOVAR_MT,EKLIPSE} \
+		${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}
 	}
 
 ###########################################
@@ -553,7 +553,7 @@ module load sge
 					${QSUB_ARGS} \
 					${STANDARD_QUEUE_QSUB_ARG} \
 				-N B01-A02-MUTECT2_MT_BAM_TO_CRAM_${SGE_SM_TAG}_${PROJECT} \
-					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}-MUTECT2_MT_BAM_TO_CRAM.log \
+					-o ${CORE_PATH}/${PROJECT}/LOGS/${SM_TAG}/${SM_TAG}-MUTECT2_MT_BAM_TO_CRAM.log \
 				-hold_jid B01-MUTECT2_MT_${SGE_SM_TAG}_${PROJECT} \
 				${SCRIPT_DIR}/B01-A02-MUTECT2_MT_BAM_TO_CRAM.sh \
 					${MITO_EKLIPSE_CONTAINER} \
