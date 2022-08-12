@@ -28,7 +28,7 @@ module load sge
 					| cut -d @ -f 1 \
 					| sort \
 					| uniq \
-					| egrep -v "all.q|cgc.q|rhel7.q|qtest.q|bigdata.q|uhoh.q|prod.q|rnd.q" \
+					| egrep -v "all.q|cgc.q|rhel7.q|qtest.q|bigdata.q|uhoh.q|prod.q|rnd.q|testcgc.q" \
 					| datamash collapse 1 \
 					| awk '{print $1}')
 			fi
